@@ -8,6 +8,7 @@ date: "2025-09-29"
 knitr::opts_chunk$set(echo = TRUE)
 library (tidyverse)
 ```
+## Problem 1
 
 ## Cleaning pols-month.csv data 
 ```{r}
@@ -72,8 +73,57 @@ finalmerge_df =
 
 finalmerge_df
 ```
+## Short descriptive paragraph 
 
+## Problem 2
+
+##Cleaning Mr. Trash Wheel sheet 
+```{r}
+mrtrashwheel_df = 
+  readxl::read_excel ("/Users/gorgeous/Desktop/fivethirtyeight_datasets/202409 Trash Wheel Collection Data.xlsx", sheet = 1, na = c("NA", ".","")) |>
+  janitor::clean_names() |>
+  filter (!is.na(dumpster)) |>
+  mutate (sports_balls = as.integer(round(sports_balls)),
+          trash_wheel = "Mr Trash Wheel",
+          year = as.integer (year))
 ```
+
+## Cleaning Professor Trash Wheel sheet 
+```{r}
+professortrashwheel_df = 
+  readxl::read_excel ("/Users/gorgeous/Desktop/fivethirtyeight_datasets/202409 Trash Wheel Collection Data.xlsx", sheet = 2, na = c("NA", ".","")) |>
+  janitor::clean_names() |>
+  filter (!is.na(dumpster)) |>
+  mutate (trash_wheel = "Professor Trash Wheel",
+          year = as.integer (year))
+```
+
+## Cleaning Gwynnda sheet 
+```{r}
+gwynnda_df = 
+  readxl::read_excel ("/Users/gorgeous/Desktop/fivethirtyeight_datasets/202409 Trash Wheel Collection Data.xlsx", sheet = 4, na = c("NA", ".","")) |>
+  janitor::clean_names() |>
+  filter (!is.na(dumpster)) |>
+  mutate (trash_wheel = "Gywnnda",
+          year = as.integer (year))
+```
+
+## Merging all three datasets together
+
+```{r}
+trashwheel_combined = 
+  bind_rows (mrtrashwheel_df, professortrashwheel_df, gwynnda_df) |>
+  janitor::clean_names()
+
+trashwheel_combined
+  
+```
+
+## Short descriptive paragraph 
+
+
+
+
 
 
 
