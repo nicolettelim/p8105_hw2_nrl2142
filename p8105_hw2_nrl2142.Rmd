@@ -15,6 +15,7 @@ polsmonth_df = read_csv ("/Users/gorgeous/Desktop/fivethirtyeight_datasets/pols-
   janitor::clean_names() |>
   separate(mon, into = c("year", "month", "day"), sep = "-") |>
   mutate (month = month.name [as.numeric (month)]) |>
+  mutate (year = as.integer(year)) |>
   pivot_longer(
     cols = c("prez_gop","prez_dem"),
     names_to = "president",
@@ -26,6 +27,8 @@ polsmonth_df = read_csv ("/Users/gorgeous/Desktop/fivethirtyeight_datasets/pols-
   select (-polstance,-day) |>
   relocate(year, month)
 
+polsmonth_df
+
 ```
 
 ## Cleaning snp.csv data
@@ -34,14 +37,45 @@ snp_df = read_csv("/Users/gorgeous/Desktop/fivethirtyeight_datasets/snp.csv") |>
   janitor::clean_names() |>
   separate(date, into = c("month", "day", "year"), sep = "/") |>
   mutate (month = month.name [as.numeric (month)]) |>
+  mutate (year = 2000 + as.integer (year)) |>
   select (-day) |>
   relocate (year,month)
+  
+  snp_df
 ```
 
 ##Cleaning unemployment data 
 ```{r}
+unemployment_df = read_csv("/Users/gorgeous/Desktop/fivethirtyeight_datasets/unemployment.csv") |>
+  janitor::clean_names() |>
+  pivot_longer(
+    cols = jan:dec,
+    names_to = "month",
+    values_to = "unemployment_percent") |>
+  relocate (year, month)
+
+unemployment_df
+```
+
+## Merging snp data into pols data
+```{r}
+snppolsmerge_df =
+  left_join (snp_df, polsmonth_df, by = c("year", "month")) |>
+  relocate (year, month)
+```
+
+## Merging result with unemployment
+```{r}
+finalmerge_df =
+  left_join (snppolsmerge_df, unemployment_df, by = c("year", "month")) |>
+  relocate (year, month)
+
+finalmerge_df
+```
 
 ```
+
+
 
 
 
