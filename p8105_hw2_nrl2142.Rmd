@@ -118,7 +118,8 @@ gwynnda_df =
   janitor::clean_names() |>
   filter (!is.na(dumpster)) |>
   mutate (trash_wheel = "Gywnns Fall Trash Wheel",
-          year = as.integer (year))
+          year = as.integer (year),
+          cigarette_butts = as.numeric(cigarette_butts))
 
 gwynnda_df
 ```
@@ -135,7 +136,7 @@ trashwheel_combined
 
 ## Short descriptive paragraph 
 
-Merging `mrtrashwheel_df`, `professortrashwheel_df` and `gwynnda_df` produces a dataset of 1188 observation with 17 variables. Key variables in this dataset are `trash_wheel` which names which trash wheel the associated data is from, `dumpster` which indicates the specific `dumpster`, `month` and `year` which denote time of observation and `weight_tons` for a weighed total (in tons) of the amount of trash picked up by the varying trash wheels. For example, the weighted total (in tons) of the amount of trash picked up by Professor. Trash Wheel is `sum(professortrashwheel_df$weight_tons, na.rm = TRUE)`. Other variables such as `cigarette_butts` or `wrappers` reports the volume of category-specific trash. For example, the total number of cigarette butts picked up by Gwynnda is `sum(gwynnda_df$cigarette_butts, na.rm - TRUE)`. 
+Merging `mrtrashwheel_df`, `professortrashwheel_df` and `gwynnda_df` produces a dataset of 1188 observation with 17 variables. Key variables in this dataset are `trash_wheel` which names which trash wheel the associated data is from, `dumpster` which indicates the specific `dumpster`, `month` and `year` which denote time of observation and `weight_tons` for a weighed total (in tons) of the amount of trash picked up by the varying trash wheels. For example, the weighted total (in tons) of the amount of trash picked up by Professor. Trash Wheel is `r sum(professortrashwheel_df$weight_tons, na.rm = TRUE)` tons. Other variables such as `cigarette_butts` or `wrappers` reports the volume of category-specific trash. For example, the total number of cigarette butts picked up by Gwynnda is `r format (sum(gwynnda_df$cigarette_butts, na.rm = TRUE), scientific = FALSE)`. 
 
 ## Problem 3
 
@@ -188,8 +189,7 @@ tidyzillow_df =
 (tidyzillow_df)
 ```
 ## Short descriptive paragraph 
-Merging 
-
+The resulting tidy dataset `tidyzillow_df` has a total of 17,687 observations with 21 variables. Key variables in this dataset are `zipcode`, `zori` which represents the Zillow Observed Rent Index (ZORI) in New York City between January 2015 and August 2024. The total number of unique zip codes in this dataset is `r n_distinct(tidyzillow_df$zip_code)` and the number if unique neighbourhoods is `r n_distinct(tidyzillow_df$neighborhood)`.
 
 ## Rental drop 
 ```{r}
@@ -209,6 +209,9 @@ tidyzillow_df |>
 
 (janprices_df)
 ```
+
+## Rental drop write-up
+The neighborhood that experienced the lowest drop in rental prices from January 2020 to 2021 is Lower Manhattan. Not only does Lower Manhattan appears three times in the table of top 10 zip codes with largest drop in price from January 2020 to 2021, their average combined rental drop is -772.048 (3 d.p.) which exceeds the second-largest rental drop listed in the table (i.e.Lower East Side). 
 
 
 
