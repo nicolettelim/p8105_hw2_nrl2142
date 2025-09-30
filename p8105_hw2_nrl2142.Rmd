@@ -8,11 +8,16 @@ date: "2025-09-29"
 knitr::opts_chunk$set(echo = TRUE)
 library (tidyverse)
 ```
+## Creating directory 
+```{r}
+dir.create ("hw2_data")
+```
+
 ## Problem 1
 
 ## Cleaning pols-month.csv data 
 ```{r}
-polsmonth_df = read_csv ("/Users/gorgeous/Desktop/fivethirtyeight_datasets/pols-month.csv") |>
+polsmonth_df = read_csv ("/Users/gorgeous/p8105_hw2_nrl2142/hw2_data/fivethirtyeight_datasets/pols-month.csv") |>
   janitor::clean_names() |>
   separate(mon, into = c("year", "month", "day"), sep = "-") |>
   mutate (month = month.name [as.numeric (month)]) |>
@@ -34,7 +39,7 @@ polsmonth_df
 
 ## Cleaning snp.csv data
 ```{r}
-snp_df = read_csv("/Users/gorgeous/Desktop/fivethirtyeight_datasets/snp.csv") |>
+snp_df = read_csv("/Users/gorgeous/p8105_hw2_nrl2142/hw2_data/fivethirtyeight_datasets/snp.csv") |>
   janitor::clean_names() |>
   separate(date, into = c("month", "day", "year"), sep = "/") |>
   mutate (month = month.name [as.numeric (month)]) |>
@@ -47,12 +52,13 @@ snp_df = read_csv("/Users/gorgeous/Desktop/fivethirtyeight_datasets/snp.csv") |>
 
 ##Cleaning unemployment data 
 ```{r}
-unemployment_df = read_csv("/Users/gorgeous/Desktop/fivethirtyeight_datasets/unemployment.csv") |>
+unemployment_df = read_csv("/Users/gorgeous/p8105_hw2_nrl2142/hw2_data/fivethirtyeight_datasets/unemployment.csv") |>
   janitor::clean_names() |>
   pivot_longer(
     cols = jan:dec,
     names_to = "month",
     values_to = "unemployment_percent") |>
+  mutate (month = month.name [match(month, tolower(month.abb))]) |>
   relocate (year, month)
 
 unemployment_df
@@ -63,53 +69,61 @@ unemployment_df
 snppolsmerge_df =
   left_join (snp_df, polsmonth_df, by = c("year", "month")) |>
   relocate (year, month)
+
+snppolsmerge_df
 ```
 
 ## Merging result with unemployment
 ```{r}
 finalmerge_df =
   left_join (snppolsmerge_df, unemployment_df, by = c("year", "month")) |>
-  relocate (year, month)
+  relocate (year, month, close, unemployment_percent, president)
 
 finalmerge_df
 ```
 ## Short descriptive paragraph 
+The tidied dataset `polsmonth_df` contained 1644 observations of 9 variables that are related to the number of national politicians who are democratic or republican at from 1947 to 2015. During the tidying process, a new key variable `president` was created with values reflecting the political affliation of a president during a given month and year. The tidied dataset `snp_df` contained 787 observations of 3 variables, i.e. year, month and close which refers to the closing values according to  to Standard & Poor's stock market index (S&P). Lastly, the dataset `unemployment_df` contains 816 observations of 3 variables (i.e. year, month and unemployment_percent) that reports the percentage of unemployment in a given month of a given year. When these three datasets are merged, the `finalmerge_df` gives us 973 observations with 11 variables.  Key variables such as year, month, unemployment_percent and president allows us to see trends in stock market performance and unemployment rates in relation to the political affliation of the sitting president (i.e. whether Republican or Democrat). 
 
 ## Problem 2
 
 ##Cleaning Mr. Trash Wheel sheet 
 ```{r}
 mrtrashwheel_df = 
-  readxl::read_excel ("/Users/gorgeous/Desktop/fivethirtyeight_datasets/202409 Trash Wheel Collection Data.xlsx", sheet = 1, na = c("NA", ".","")) |>
+  readxl::read_excel ("/Users/gorgeous/p8105_hw2_nrl2142/hw2_data/202509 Trash Wheel Collection Data.xlsx", sheet = 1, na = c("NA", ".","")) |>
   janitor::clean_names() |>
   filter (!is.na(dumpster)) |>
   mutate (sports_balls = as.integer(round(sports_balls)),
           trash_wheel = "Mr Trash Wheel",
           year = as.integer (year))
+
+mrtrashwheel_df
 ```
 
 ## Cleaning Professor Trash Wheel sheet 
 ```{r}
 professortrashwheel_df = 
-  readxl::read_excel ("/Users/gorgeous/Desktop/fivethirtyeight_datasets/202409 Trash Wheel Collection Data.xlsx", sheet = 2, na = c("NA", ".","")) |>
+  readxl::read_excel ("/Users/gorgeous/p8105_hw2_nrl2142/hw2_data/202509 Trash Wheel Collection Data.xlsx", sheet = 2, na = c("NA", ".","")) |>
   janitor::clean_names() |>
   filter (!is.na(dumpster)) |>
   mutate (trash_wheel = "Professor Trash Wheel",
           year = as.integer (year))
+
+professortrashwheel_df
 ```
 
 ## Cleaning Gwynnda sheet 
 ```{r}
 gwynnda_df = 
-  readxl::read_excel ("/Users/gorgeous/Desktop/fivethirtyeight_datasets/202409 Trash Wheel Collection Data.xlsx", sheet = 4, na = c("NA", ".","")) |>
+  readxl::read_excel ("/Users/gorgeous/p8105_hw2_nrl2142/hw2_data/202509 Trash Wheel Collection Data.xlsx", sheet = 4, na = c("NA", ".","")) |>
   janitor::clean_names() |>
   filter (!is.na(dumpster)) |>
-  mutate (trash_wheel = "Gywnnda",
+  mutate (trash_wheel = "Gywnns Fall Trash Wheel",
           year = as.integer (year))
+
+gwynnda_df
 ```
 
 ## Merging all three datasets together
-
 ```{r}
 trashwheel_combined = 
   bind_rows (mrtrashwheel_df, professortrashwheel_df, gwynnda_df) |>
@@ -121,10 +135,80 @@ trashwheel_combined
 
 ## Short descriptive paragraph 
 
+Merging `mrtrashwheel_df`, `professortrashwheel_df` and `gwynnda_df` produces a dataset of 1188 observation with 17 variables. Key variables in this dataset are `trash_wheel` which names which trash wheel the associated data is from, `dumpster` which indicates the specific `dumpster`, `month` and `year` which denote time of observation and `weight_tons` for a weighed total (in tons) of the amount of trash picked up by the varying trash wheels. For example, the weighted total (in tons) of the amount of trash picked up by Professor. Trash Wheel is `sum(professortrashwheel_df$weight_tons, na.rm = TRUE)`. Other variables such as `cigarette_butts` or `wrappers` reports the volume of category-specific trash. For example, the total number of cigarette butts picked up by Gwynnda is `sum(gwynnda_df$cigarette_butts, na.rm - TRUE)`. 
+
+## Problem 3
+
+## Cleaning Zip.codes csv
+```{r}
+zipcode_df = read_csv ("/Users/gorgeous/p8105_hw2_nrl2142/hw2_data/zillow_data/Zip codes.csv", na = c("NA", ".","")) |>
+  janitor::clean_names() |>
+  mutate (county = as.character(county)) |>
+  rename (date = file_date) |>
+  separate (date, into = c("month", "day", "year"), sep = "/") |>
+  mutate (year = as.integer(2000 + as.integer(year)),
+          month = month.name [as.numeric (month)]) |>
+  distinct() |>
+  relocate (zip_code,county, year, month, day)
+
+zipcode_df
+  
+```
+
+## Cleaning ZORI data 
+```{r}
+zori_df = read_csv ("/Users/gorgeous/p8105_hw2_nrl2142/hw2_data/zillow_data/Zip_zori_uc_sfrcondomfr_sm_month_NYC.csv",na = c("NA", ".","")) |>
+  janitor::clean_names()|>
+  pivot_longer (
+    cols = x2015_01_31:x2024_08_31,
+    names_to = "date",
+    values_to ="zori",
+    names_prefix ="x") |>
+    separate(date, into = c("year", "month", "day"), sep = "_")|>
+  mutate (year = as.integer(year),
+          month = month.name [as.numeric (month)])|>
+  rename (county = county_name,
+         zip_code = region_name) |>
+  mutate(county = str_replace(county, "County$", ""),
+         county = as.character (county)) |>
+  distinct() |>
+  relocate (zip_code,county, year, month, day)
+
+zori_df
+  
+```
+
+## Merging zipcode_df with zori_df
+```{r}
+tidyzillow_df = 
+  left_join (zipcode_df, zori_df, by = c("zip_code"), relationship ="many-to-many") |>
+  distinct() |>
+  relocate (zip_code)
+
+(tidyzillow_df)
+```
+## Short descriptive paragraph 
+Merging 
 
 
+## Rental drop 
+```{r}
+janprices_df =
+tidyzillow_df |>
+  select (state, city, neighborhood, zip_code, year.y, month.y, zori, county.y) |>
+  filter (month.y == "January", year.y %in% c(2020, 2021)) |>
+  group_by (state, city, neighborhood, zip_code, county.y, year.y) |>
+  summarise (zori = mean(zori, na.rm = TRUE), .groups = "drop") |>
+  pivot_wider (names_from = "year.y", 
+               values_from = "zori",
+               names_prefix = "jan") |>
+  filter (!is.na(jan2020),!is.na(jan2021), !is.na(neighborhood)) |>
+  mutate (price_change = jan2021 - jan2020) |>
+  arrange (price_change)|>
+  slice (1:10)
 
-
+(janprices_df)
+```
 
 
 
