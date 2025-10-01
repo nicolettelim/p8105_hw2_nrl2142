@@ -191,6 +191,17 @@ tidyzillow_df =
 ## Short descriptive paragraph 
 The resulting tidy dataset `tidyzillow_df` has a total of 17,687 observations with 21 variables. Key variables in this dataset are `zipcode`, `zori` which represents the Zillow Observed Rent Index (ZORI) in New York City between January 2015 and August 2024. The total number of unique zip codes in this dataset is `r n_distinct(tidyzillow_df$zip_code)` and the number if unique neighbourhoods is `r n_distinct(tidyzillow_df$neighborhood)`.
 
+## Missing Zip codes 
+```{r}
+missingzipcode_df =
+  setdiff(zipcode_df$zip_code, zori_df$zip_code)
+
+missingzipcode_df
+```
+
+## Missing Zip code write-up
+There are a total of `r length(missingzipcode_df)` zip codes in `zipcode_df` that do not appear in `zori_df`. For example `r paste(head(missingzipcode_df, 5), collapse = ",")`. Potential reasons for this are 1. Some zipcodes may be primarily commercial or industrial and thus have to relevance to Zillow's rental index in the `zori_df` dataset. 2. Data in `zipcode_df` was recorded in 2007 and some zipcodes could have been removed or changed, making it irrelevant to the `zori_df` dataset that captures rent index from 2015 to 2024. 
+
 ## Rental drop 
 ```{r}
 janprices_df =
